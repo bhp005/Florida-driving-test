@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#0a0e1a">
+<title>Florida Driver License Test</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0a0e1a;--surface:#111827;--surface2:#1c2538;--border:#2a3650;--accent:#f59e0b;--accent2:#3b82f6;--pass:#10b981;--fail:#ef4444;--text:#e2e8f0;--muted:#64748b;}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+html{font-size:16px;-webkit-text-size-adjust:100%;}
+body{font-family:"DM Sans",sans-serif;background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden;-webkit-font-smoothing:antialiased;}
+body::before{content:"";position:fixed;inset:0;background-image:linear-gradient(rgba(59,130,246,.04) 1px,transparent 1px),linear-gradient(90deg,rgba(59,130,246,.04) 1px,transparent 1px);background-size:40px 40px;pointer-events:none;z-index:0;}
+.wrap{max-width:680px;margin:0 auto;padding:12px 16px 40px;position:relative;z-index:1;}
+header{text-align:center;padding:24px 0 18px;}
+.badge{display:inline-block;background:rgba(245,158,11,.15);border:1px solid rgba(245,158,11,.4);color:var(--accent);font-size:10px;font-weight:600;letter-spacing:2px;text-transform:uppercase;padding:4px 12px;border-radius:20px;margin-bottom:12px;}
+h1{font-family:"Bebas Neue",sans-serif;font-size:clamp(1.9rem,8vw,3.2rem);letter-spacing:2px;line-height:1;margin-bottom:6px;background:linear-gradient(135deg,#f59e0b,#3b82f6);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+.subtitle{color:var(--muted);font-size:.85rem;}
+
+/* progress */
+.prog-wrap{background:var(--surface2);border:1px solid var(--border);border-radius:12px;padding:12px 14px;margin-bottom:16px;display:flex;align-items:center;gap:10px;}
+.prog-lbl{font-size:.72rem;color:var(--muted);white-space:nowrap;min-width:82px;}
+.prog-track{flex:1;height:8px;background:var(--border);border-radius:99px;overflow:hidden;}
+.prog-fill{height:100%;background:linear-gradient(90deg,#f59e0b,#3b82f6);border-radius:99px;transition:width .4s ease;width:0%;}
+.prog-score{font-size:.8rem;font-weight:600;color:var(--accent);min-width:60px;text-align:right;}
+
+/* card */
+.card{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:20px 16px;margin-bottom:14px;position:relative;overflow:hidden;animation:slideIn .3s ease;}
+@keyframes slideIn{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
+.card::before{content:"";position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,#f59e0b,#3b82f6);}
+.q-num{font-size:.7rem;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;color:var(--accent);margin-bottom:8px;}
+.q-text{font-size:1rem;font-weight:500;line-height:1.6;margin-bottom:18px;color:#f1f5f9;}
+.q-img{text-align:center;margin-bottom:16px;}
+.q-img svg{width:130px;height:130px;}
+
+/* options */
+.options{display:flex;flex-direction:column;gap:10px;}
+.opt{display:flex;align-items:center;gap:12px;min-height:52px;padding:12px 14px;background:var(--surface2);border:1.5px solid var(--border);border-radius:12px;cursor:pointer;transition:border-color .15s,background .15s;font-size:.92rem;line-height:1.4;-webkit-tap-highlight-color:transparent;user-select:none;touch-action:manipulation;}
+.opt:active:not(.locked){transform:scale(.985);}
+@media(hover:hover){.opt:hover:not(.locked){border-color:var(--accent2);background:rgba(59,130,246,.08);}}
+.opt.correct{border-color:var(--pass)!important;background:rgba(16,185,129,.1)!important;}
+.opt.wrong{border-color:var(--fail)!important;background:rgba(239,68,68,.1)!important;}
+.opt-l{width:30px;height:30px;min-width:30px;border-radius:8px;background:var(--border);display:flex;align-items:center;justify-content:center;font-size:.75rem;font-weight:700;color:var(--muted);flex-shrink:0;transition:background .15s,color .15s;}
+.opt.correct .opt-l{background:var(--pass);color:#fff;}
+.opt.wrong   .opt-l{background:var(--fail);color:#fff;}
+
+/* explanation */
+.expl{margin-top:14px;padding:12px 14px;background:rgba(59,130,246,.07);border-left:3px solid var(--accent2);border-radius:0 8px 8px 0;font-size:.84rem;color:#94a3b8;line-height:1.55;display:none;}
+.expl.show{display:block;}
+.expl strong{color:var(--accent2);}
+
+/* button */
+.btn-row{margin-top:6px;}
+.btn{display:block;width:100%;min-height:52px;padding:14px 20px;border-radius:12px;border:none;font-family:"DM Sans",sans-serif;font-size:1rem;font-weight:600;cursor:pointer;touch-action:manipulation;-webkit-tap-highlight-color:transparent;transition:opacity .15s,transform .15s;}
+.btn-gold{background:linear-gradient(135deg,#f59e0b,#d97706);color:#0a0e1a;}
+.btn-gold:active{opacity:.88;transform:scale(.98);}
+.btn-gold:disabled{background:var(--border);color:var(--muted);cursor:not-allowed;transform:none!important;opacity:1;}
+
+/* start screen */
+#scr-start{text-align:center;padding:8px 0;}
+.rules-card{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:20px 16px;margin:16px 0;text-align:left;}
+.rules-card h3{font-family:"Bebas Neue",sans-serif;font-size:1.2rem;letter-spacing:1px;color:var(--accent);margin-bottom:12px;}
+.rule{display:flex;align-items:flex-start;gap:10px;margin-bottom:10px;font-size:.875rem;color:#94a3b8;line-height:1.45;}
+.dot{width:6px;height:6px;min-width:6px;border-radius:50%;background:var(--accent2);margin-top:7px;}
+.tags{display:flex;flex-wrap:wrap;gap:6px;margin:14px 0 20px;justify-content:center;}
+.tag{background:rgba(59,130,246,.1);border:1px solid rgba(59,130,246,.25);color:#93c5fd;font-size:.7rem;padding:4px 10px;border-radius:99px;}
+
+/* quiz screen */
+#scr-quiz{display:none;}
+
+/* results screen */
+#scr-results{display:none;text-align:center;padding:24px 0 16px;}
+.ring{width:140px;height:140px;border-radius:50%;display:flex;flex-direction:column;align-items:center;justify-content:center;margin:0 auto 24px;}
+.ring.pass{background:radial-gradient(circle,rgba(16,185,129,.15),transparent 70%);border:4px solid var(--pass);box-shadow:0 0 36px rgba(16,185,129,.3);}
+.ring.fail{background:radial-gradient(circle,rgba(239,68,68,.12),transparent 70%);border:4px solid var(--fail);box-shadow:0 0 36px rgba(239,68,68,.2);}
+.ring-pct{font-family:"Bebas Neue",sans-serif;font-size:2.8rem;line-height:1;}
+.ring.pass .ring-pct{color:var(--pass);}
+.ring.fail .ring-pct{color:var(--fail);}
+.ring-lbl{font-size:.75rem;color:var(--muted);}
+.verdict{font-family:"Bebas Neue",sans-serif;font-size:2.2rem;letter-spacing:2px;margin-bottom:8px;}
+.verdict.pass{color:var(--pass);}
+.verdict.fail{color:var(--fail);}
+.summary{color:var(--muted);font-size:.9rem;margin-bottom:24px;line-height:1.6;}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:0 auto 24px;}
+.sbox{background:var(--surface2);border:1px solid var(--border);border-radius:12px;padding:14px 10px;}
+.sval{font-family:"Bebas Neue",sans-serif;font-size:1.8rem;line-height:1;}
+.sval.g{color:var(--pass);}
+.sval.r{color:var(--fail);}
+.sval.b{color:var(--accent2);}
+.slbl{font-size:.7rem;color:var(--muted);margin-top:3px;}
+
+@media(min-width:600px){
+  .wrap{padding:16px 24px 48px;}
+  .btn{display:inline-block;width:auto;padding:13px 36px;}
+  .btn-row{display:flex;justify-content:flex-end;}
+  .q-img svg{width:160px;height:160px;}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <div class="badge">Official Study Guide</div>
+  <h1>Florida Driver Knowledge Test</h1>
+  <p class="subtitle">Based on the Official Florida Driver License Handbook (2023)</p>
+</header>
+
+<!-- START -->
+<div id="scr-start">
+  <div class="rules-card">
+    <h3>Test Rules</h3>
+    <div class="rule"><div class="dot"></div><span>50 questions drawn from the Florida Driver License Handbook</span></div>
+    <div class="rule"><div class="dot"></div><span>You must score <strong style="color:var(--accent)">80% or higher (40/50)</strong> to pass</span></div>
+    <div class="rule"><div class="dot"></div><span>One answer per question — instant feedback after each</span></div>
+    <div class="rule"><div class="dot"></div><span>Some questions include road sign images</span></div>
+    <div class="rule"><div class="dot"></div><span>Questions shuffle on every attempt</span></div>
+  </div>
+  <div class="tags">
+    <span class="tag">Licensing</span><span class="tag">Traffic Signals</span><span class="tag">Speed Limits</span>
+    <span class="tag">Right-of-Way</span><span class="tag">DUI Laws</span><span class="tag">Safety Belts</span>
+    <span class="tag">Road Signs</span><span class="tag">Sharing the Road</span><span class="tag">Emergencies</span>
+    <span class="tag">Distracted Driving</span><span class="tag">Special Situations</span><span class="tag">Vehicle Equipment</span>
+  </div>
+  <button class="btn btn-gold" onclick="startQuiz()">Start Test &rarr;</button>
+</div>
+
+<!-- QUIZ -->
+<div id="scr-quiz">
+  <div class="prog-wrap">
+    <span class="prog-lbl" id="progLbl">Question 1 / 50</span>
+    <div class="prog-track"><div class="prog-fill" id="progFill"></div></div>
+    <span class="prog-score" id="progScore">Score: 0</span>
+  </div>
+  <div id="qArea"></div>
+  <div class="btn-row">
+    <button class="btn btn-gold" id="nextBtn" onclick="nextQ()" disabled>Next Question &rarr;</button>
+  </div>
+</div>
+
+<!-- RESULTS -->
+<div id="scr-results">
+  <div class="ring" id="resRing">
+    <div class="ring-pct" id="resPct">0%</div>
+    <div class="ring-lbl">SCORE</div>
+  </div>
+  <div class="verdict" id="resVerdict"></div>
+  <div class="summary" id="resSummary"></div>
+  <div class="stats">
+    <div class="sbox"><div class="sval g" id="statC">0</div><div class="slbl">Correct</div></div>
+    <div class="sbox"><div class="sval r" id="statW">0</div><div class="slbl">Wrong</div></div>
+    <div class="sbox"><div class="sval b">40</div><div class="slbl">To Pass</div></div>
+  </div>
+  <button class="btn btn-gold" onclick="restart()">Try Again</button>
+</div>
+
+</div>
+<script>
+const SIGNS = {
+  stop: `<svg viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg"><polygon points="35,10 85,10 110,35 110,85 85,110 35,110 10,85 10,35" fill="#CC0000" stroke="white" stroke-width="4"/><text x="60" y="68" text-anchor="middle" fill="white" font-family="Arial Black,sans-serif" font-size="22" font-weight="900">STOP</text></svg>`,
+  yield: `<svg viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg"><polygon points="60,8 112,102 8,102" fill="#CC0000" stroke="white" stroke-width="4"/><polygon points="60,22 100,95 20,95" fill="white"/><text x="60" y="80" text-anchor="middle" fill="#CC0000" font-family="Arial Black,sans-serif" font-size="16" font-weight="900">YIELD</text></svg>`,
+  speed55: `<svg viewBox="0 0 110 140" xmlns="http://www.w3.org/2000/svg"><rect x="5" y="5" width="100" height="130" rx="10" fill="white" stroke="#000" stroke-width="4"/><text x="55" y="38" text-anchor="middle" fill="#000" font-family="Arial,sans-serif" font-size="13" font-weight="bold">SPEED</text><text x="55" y="56" text-anchor="middle" fill="#000" font-family="Arial,sans-serif" font-size="13" font-weight="bold">LIMIT</text><text x="55" y="110" text-anchor="middle" fill="#000" font-family="Arial Black,sans-serif" font-size="58" font-weight="900">55</text></svg>`,
+  doNotEnter: `<svg viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg"><circle cx="60" cy="60" r="55" fill="#CC0000" stroke="white" stroke-width="3"/><rect x="18" y="48" width="84" height="24" rx="3" fill="white"/><text x="60" y="66" text-anchor="middle" fill="#CC0000" font-family="Arial Black,sans-serif" font-size="14" font-weight="900">DO NOT ENTER</text></svg>`,
+  wrongWay: `<svg viewBox="0 0 130 80" xmlns="http://www.w3.org/2000/svg"><rect x="2" y="2" width="126" height="76" rx="6" fill="#CC0000" stroke="white" stroke-width="3"/><text x="65" y="30" text-anchor="middle" fill="white" font-family="Arial Black,sans-serif" font-size="18" font-weight="900">WRONG</text><text x="65" y="60" text-anchor="middle" fill="white" font-family="Arial Black,sans-serif" font-size="18" font-weight="900">WAY</text></svg>`,
+  schoolZone: `<svg viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg"><polygon points="60,5 115,32 115,88 60,115 5,88 5,32" fill="#FFD700" stroke="#000" stroke-width="2.5"/><text x="60" y="48" text-anchor="middle" fill="#000" font-family="Arial,sans-serif" font-size="11" font-weight="bold">SCHOOL</text><text x="60" y="64" text-anchor="middle" fill="#000" font-family="Arial,sans-serif" font-size="11" font-weight="bold">ZONE</text><text x="60" y="84" text-anchor="middle" fill="#000" font-family="Arial,sans-serif" font-size="16" font-weight="900">20</text><text x="60" y="98" text-anchor="middle" fill="#000" font-family="Arial,sans-serif" font-size="9">MPH</text></svg>`,
+  noUTurn: `<svg viewBox="0 0 110 110" xmlns="http://www.w3.org/2000/svg"><circle cx="55" cy="55" r="52" fill="white" stroke="#CC0000" stroke-width="5"/><text x="55" y="72" text-anchor="middle" fill="#CC0000" font-family="Arial,sans-serif" font-size="48">↪</text><line x1="15" y1="15" x2="95" y2="95" stroke="#CC0000" stroke-width="6"/></svg>`,
+  railroad: `<svg viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg"><circle cx="60" cy="60" r="55" fill="#FFD700" stroke="black" stroke-width="3"/><text x="60" y="80" text-anchor="middle" fill="black" font-family="Arial Black,sans-serif" font-size="70" font-weight="900">R</text><circle cx="60" cy="60" r="55" fill="none" stroke="black" stroke-width="3"/><line x1="5" y1="60" x2="115" y2="60" stroke="black" stroke-width="3"/></svg>`,
+  construction: `<svg viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg"><polygon points="60,5 115,60 60,115 5,60" fill="#FF6600" stroke="black" stroke-width="2"/><text x="60" y="52" text-anchor="middle" fill="black" font-family="Arial,sans-serif" font-size="10" font-weight="bold">ROAD</text><text x="60" y="66" text-anchor="middle" fill="black" font-family="Arial,sans-serif" font-size="10" font-weight="bold">WORK</text><text x="60" y="80" text-anchor="middle" fill="black" font-family="Arial,sans-serif" font-size="10" font-weight="bold">AHEAD</text></svg>`,
+  merge: `<svg viewBox="0 0 110 130" xmlns="http://www.w3.org/2000/svg"><polygon points="55,5 105,50 85,50 85,125 25,125 25,50 5,50" fill="#FFD700" stroke="black" stroke-width="2"/><text x="55" y="110" text-anchor="middle" fill="black" font-family="Arial,sans-serif" font-size="12" font-weight="bold">MERGE</text></svg>`,
+  divided_hwy: `<svg viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg"><polygon points="60,5 115,60 60,115 5,60" fill="#FFD700" stroke="black" stroke-width="2.5"/><rect x="48" y="35" width="8" height="50" rx="2" fill="black"/><rect x="64" y="35" width="8" height="50" rx="2" fill="black"/><polygon points="52,35 52,45 42,40" fill="black"/><polygon points="68,85 68,75 78,80" fill="black"/></svg>`,
+  noParking: `<svg viewBox="0 0 110 110" xmlns="http://www.w3.org/2000/svg"><circle cx="55" cy="55" r="52" fill="white" stroke="#1a56db" stroke-width="5"/><text x="55" y="75" text-anchor="middle" fill="#1a56db" font-family="Arial Black,sans-serif" font-size="62" font-weight="900">P</text><line x1="15" y1="15" x2="95" y2="95" stroke="#CC0000" stroke-width="6"/></svg>`,
+};
+
+const QUESTIONS = [
+  // === LICENSING & ID CARDS ===
+  {q:"What is the minimum age to apply for a Florida learner's driver license?",opts:["14","15","16","17"],ans:1,exp:"Florida law allows persons at least 15 years of age to apply for a learner's driver license."},
+  {q:"How many months must a learner's license holder wait before applying for a full Class E license?",opts:["6 months","9 months","12 months","18 months"],ans:2,exp:"A learner's license holder must hold the permit for at least 12 months before applying for a full license."},
+  {q:"How many total supervised driving hours are required for a teen driver before getting a full license?",opts:["25 hours","40 hours","50 hours","60 hours"],ans:2,exp:"Florida requires at least 50 hours of supervised driving, including at least 10 hours at night."},
+  {q:"Of the 50 required supervised driving hours, how many must be at night?",opts:["5 hours","10 hours","15 hours","20 hours"],ans:1,exp:"At least 10 of the 50 required supervised hours must be driven at night."},
+  {q:"Under Florida's Graduated Driver License law, how many points in 12 months triggers an automatic restriction to 'Business Purposes Only' for drivers under 18?",opts:["3 points","4 points","6 points","8 points"],ans:2,exp:"Drivers under 18 who accumulate 6 or more points within a 12-month period are automatically restricted to driving for Business Purposes Only for one year."},
+  {q:"How soon after moving must you update your Florida driver license address?",opts:["14 days","30 days","60 days","90 days"],ans:1,exp:"Florida drivers must notify the FLHSMV of an address change within 30 days of moving."},
+  {q:"What is the fee for a Florida Class E driver license renewal?",opts:["$25","$35","$48","$60"],ans:2,exp:"The fee for a Class E driver license renewal in Florida is $48."},
+  {q:"Drivers 80 years and older renewing their Florida license must pass which additional requirement?",opts:["A full road skills test","A written knowledge test","A vision exam","A hearing test"],ans:2,exp:"All drivers 80 years of age or older must pass a vision exam when renewing their Florida driver license."},
+  {q:"What is the minimum vision requirement (with or without corrective lenses) for a Florida driver license?",opts:["20/30 in one eye","20/40 in the better eye","20/60 in either eye","20/70 in both eyes"],ans:1,exp:"You must have at least 20/40 vision in your better eye, with or without corrective lenses, to qualify for a Florida driver license."},
+  {q:"What is the penalty for using fraud when applying for a Florida driver license?",opts:["A $100 fine","A 30-day suspension","Up to 5 years in prison, a $5,000 fine, and at least 1-year suspension","Community service only"],ans:2,exp:"Florida law states the penalty for fraud in a driver license application can be up to five years in prison, a $5,000 fine, and suspension of driving privileges for at least one year."},
+
+  // === SAFETY BELTS & CHILD RESTRAINTS ===
+  {q:"Florida law requires all drivers, front seat passengers, and passengers under what age to wear safety belts?",opts:["16","17","18","21"],ans:2,exp:"Florida law requires all drivers, front seat passengers, and all passengers under the age of 18 to wear safety belts."},
+  {q:"Children under what age must be secured in a child safety seat in Florida?",opts:["Age 2","Age 3","Age 4","Age 5"],ans:2,exp:"Children under age 4 must be secured in a safety seat. Children ages 4 and 5 must be in a safety seat or booster seat."},
+  {q:"Why should children under 13 ride in the rear seat?",opts:["The rear seat has better visibility","Airbags can injure or kill young children in the front seat","Rear seats have stronger belts","It is required on all Florida roads"],ans:1,exp:"Children under 13 should be secured in the rear seat because airbags can injure or kill young children in the front seat. Never place a rear-facing car seat in front of an airbag."},
+  {q:"Airbags are a substitute for safety belts — True or False?",opts:["True — airbags provide full protection","False — airbags are NOT a substitute for safety belts","True — only for front-seat passengers","True — only at highway speeds"],ans:1,exp:"The handbook explicitly states: Airbags are NOT a substitute for safety belts. Both must be used together for maximum protection."},
+
+  // === DUI & ALCOHOL ===
+  {q:"What is the Blood Alcohol Content (BAC) legal limit for non-commercial drivers aged 21 and older in Florida?",opts:[".05%",".08%",".10%",".12%"],ans:1,exp:"The legal BAC limit for non-commercial drivers aged 21 and older in Florida is .08%."},
+  {q:"What is Florida's BAC limit for drivers under 21?",opts:[".00%",".02%",".04%",".08%"],ans:1,exp:"Florida's Zero Tolerance law means any driver under 21 with a BAC of .02% or higher will have their driving privilege automatically suspended for six months."},
+  {q:"What happens if you refuse a breath, blood, or urine test when lawfully requested in Florida?",opts:["Nothing unless convicted","License suspended for at least one year","A $100 fine only","You must attend DUI school"],ans:1,exp:"Under Florida's Implied Consent Law, refusing a lawful test results in an automatic license suspension of one year for a first refusal, and 18 months for a second refusal."},
+  {q:"What is the minimum fine for a first DUI conviction in Florida?",opts:["$100","$250","$500","$1,000"],ans:2,exp:"The fine for a first DUI conviction in Florida is $500–$1,000. If the BAC was .15 or higher, or a minor was in the vehicle, the minimum fine is $1,000."},
+  {q:"How many community service hours are required for a first DUI conviction in Florida?",opts:["25 hours","50 hours","75 hours","100 hours"],ans:1,exp:"A first DUI conviction in Florida requires 50 hours of community service."},
+
+  // === TRAFFIC SIGNALS & SIGNS (some with images) ===
+  {q:"What does this sign mean?",img:"stop",opts:["Yield to traffic from the right","Come to a complete stop, then proceed when safe","Slow down and proceed with caution","Stop only if other vehicles are present"],ans:1,exp:"An octagonal red STOP sign requires a complete stop at the stop line or before the crosswalk. Proceed only when it is safe to do so."},
+  {q:"What does this sign mean?",img:"yield",opts:["Stop completely and wait","Slow down, yield the right-of-way to traffic, and proceed when safe","No entry ahead","Merge with oncoming traffic"],ans:1,exp:"A triangular red-and-white YIELD sign means you must slow down and yield the right-of-way to vehicles and pedestrians in or approaching the intersection."},
+  {q:"What does this sign require?",img:"doNotEnter",opts:["Proceed with caution","No left turn","You must not enter — this road is one-way coming toward you","Stop and yield to pedestrians"],ans:2,exp:"A DO NOT ENTER sign means you must not enter. It is used on exit ramps and one-way streets to prevent wrong-way driving."},
+  {q:"This road sign means:",img:"wrongWay",opts:["Detour ahead","You are traveling in the wrong direction on a one-way road","Construction zone ahead","Road closed permanently"],ans:1,exp:"A WRONG WAY sign indicates you are traveling in the wrong direction on a divided highway or one-way road. You must stop immediately, back up safely, and return to the correct lane."},
+  {q:"What does this diamond-shaped orange sign indicate?",img:"construction",opts:["A scenic route ahead","A national park entrance","A road construction or maintenance work zone ahead","A detour is in effect"],ans:2,exp:"Orange diamond-shaped signs are used in construction and maintenance work zones to notify drivers of unusual or potentially dangerous conditions near work areas."},
+  {q:"What does this railroad crossing sign warn you to do?",img:"railroad",opts:["Stop completely and wait for instructions","Slow down and be prepared to stop if a train is approaching","No crossing allowed","Yield only to freight trains"],ans:1,exp:"When you see a railroad crossing sign and active signals, you must stop and wait until it is safe to cross. Never attempt to beat a train across the tracks."},
+  {q:"What does a flashing RED traffic light require you to do?",opts:["Slow down and proceed","Yield to traffic from the left","Treat it like a STOP sign — stop and proceed when safe","The light is malfunctioning; proceed freely"],ans:2,exp:"A flashing red light is used at dangerous intersections. Treat it exactly like a stop sign: come to a complete stop, then proceed when safe."},
+  {q:"What does a flashing YELLOW traffic light mean?",opts:["Stop immediately","Proceed with caution","Yield to all oncoming traffic","Prepare to stop; the light will turn red"],ans:1,exp:"A flashing yellow light warns of a potentially dangerous area ahead. Proceed with caution."},
+  {q:"What does a solid Red X lane signal mean?",opts:["Merge to the left","Slow down in this lane","HOV lane ahead","Never drive in this lane"],ans:3,exp:"A red X lane signal means you must never drive in that lane. Lane signals control which lanes are open or closed at various times of day."},
+  {q:"When approaching a GREEN light, what must you do before turning left?",opts:["Proceed immediately — you have the right-of-way","Flash your turn signal and go","Yield to oncoming traffic and pedestrians","Stop first, then turn"],ans:2,exp:"A green light allows you to go, but when turning left you must yield to oncoming traffic and pedestrians before completing the turn."},
+
+  // === SPEED LIMITS ===
+  {q:"What is the speed limit in a Florida school zone when children are present, unless otherwise posted?",opts:["15 mph","20 mph","25 mph","30 mph"],ans:1,exp:"The speed limit in a school zone when children are present is 20 mph unless otherwise posted."},
+  {q:"What is the maximum speed limit on a Florida interstate highway outside an urban area?",opts:["55 mph","60 mph","65 mph","70 mph"],ans:3,exp:"On Florida interstate highways outside urban areas, the maximum speed limit is 70 mph."},
+  {q:"What is the maximum speed limit in a Florida residential area unless otherwise posted?",opts:["20 mph","25 mph","30 mph","35 mph"],ans:2,exp:"The maximum speed limit in a residential area in Florida is 30 mph unless otherwise posted."},
+
+  // === RIGHT-OF-WAY ===
+  {q:"At an uncontrolled intersection where two vehicles arrive at the same time, who has the right-of-way?",opts:["The faster vehicle","The larger vehicle","The vehicle on the right","The vehicle on the left"],ans:2,exp:"When two vehicles arrive at an uncontrolled intersection at the same time, the vehicle on the right has the right-of-way."},
+  {q:"When entering a highway from a private driveway or road, who must yield?",opts:["Vehicles already on the highway","The driver entering from the driveway","Whoever arrives second","The smaller vehicle"],ans:1,exp:"A driver entering a highway from a private road, driveway, alley, or building must yield the right-of-way to vehicles already on the highway."},
+  {q:"What must you do when an emergency vehicle with flashing lights or siren approaches?",opts:["Speed up to clear the road","Maintain your speed and stay in your lane","Pull to the right and stop until it passes","Flash your hazard lights and continue"],ans:2,exp:"When an emergency vehicle approaches with lights or siren, you must immediately pull over to the right edge of the road and stop until it has passed."},
+  {q:"Florida's Move Over Law requires drivers to:",opts:["Come to a complete stop on any road","Move over one lane from stopped emergency/utility vehicles; slow down if unable to change lanes","Only move over on interstates","Honk to warn other drivers and maintain speed"],ans:1,exp:"Florida's Move Over law requires drivers to move over one lane away from stopped emergency, sanitation, or utility vehicles on the shoulder. If you cannot safely change lanes, slow down to 20 mph below the posted limit."},
+  {q:"When must you stop for a pedestrian?",opts:["Only when a crossing guard is present","You must stop for pedestrians crossing at any marked crosswalk or intersection","Only when the pedestrian is already in the street","Only in designated school zones"],ans:1,exp:"Motorists must stop and remain stopped for pedestrians crossing at any marked crossing or intersection. Never block a crosswalk when stopped at a red light."},
+
+  // === ROAD MARKINGS & PASSING ===
+  {q:"What does a solid yellow line on YOUR side of the center line mean?",opts:["You may pass when safe","Passing is prohibited from your lane","You are entering a school zone","A bike lane begins ahead"],ans:1,exp:"A solid yellow line on your side of the center line means passing is not permitted from your lane."},
+  {q:"When is it legal to pass on the right in Florida?",opts:["Whenever traffic is slow","Only if there are two lanes in your direction","When the vehicle ahead is turning left and there is sufficient road width, or on multi-lane roads","Never — it is always illegal"],ans:2,exp:"You may pass on the right when the vehicle ahead is making a left turn and there is enough pavement, or on one-way streets and multi-lane highways where it is safe."},
+  {q:"How far before a turn must you signal in Florida?",opts:["50 feet","100 feet","150 feet","200 feet"],ans:1,exp:"Florida law requires signaling at least 100 feet before turning or changing lanes."},
+  {q:"What is the recommended following distance in normal conditions?",opts:["1-second rule","2-second rule","3-second rule","4-second rule"],ans:2,exp:"The 3-second rule is recommended for a safe following distance. Increase this in bad weather or when following large trucks."},
+
+  // === HEADLIGHTS & VISIBILITY ===
+  {q:"In Florida, when are you required to use your headlights?",opts:["Only after dark","Between sunset and sunrise, and any time visibility is less than 1,000 feet","During rain only","Any time you use your wipers"],ans:1,exp:"Florida law requires headlights between sunset and sunrise and whenever visibility is less than 1,000 feet due to weather or other conditions."},
+  {q:"When you turn on your windshield wipers due to rain in Florida, you must also:",opts:["Activate your hazard lights","Turn on your headlights","Reduce speed by at least 10 mph","Move to the right lane"],ans:1,exp:"Florida law requires that when your windshield wipers are in use due to rain or weather, your headlights must also be turned on."},
+  {q:"When driving in fog, which headlight setting should you use?",opts:["High beams for better visibility","Low beams — high beams reflect off fog and impair visibility","Hazard lights only","No headlights — they make visibility worse"],ans:1,exp:"In fog, use low beams. High beams reflect off the fog and actually impair visibility further. Use the right edge of the road as a visual guide."},
+
+  // === EMERGENCIES & SPECIAL SITUATIONS ===
+  {q:"If a crash is unavoidable, the handbook says it is better to:",opts:["Swerve into oncoming traffic to avoid a stationary object","Brake hard and steer left","Hit a moving vehicle going the same direction rather than a vehicle coming head-on","Speed up to minimize impact time"],ans:2,exp:"The handbook states: if a crash is unavoidable, hitting a vehicle moving in the same direction as you is better than hitting a vehicle head-on. It is also better to swerve off the road than into oncoming traffic."},
+  {q:"What should you do if your vehicle begins to skid?",opts:["Brake hard immediately","Steer in the direction you want to go and ease off the accelerator","Turn the wheel sharply in the opposite direction","Accelerate to regain traction"],ans:1,exp:"If your vehicle skids, ease off the accelerator and steer in the direction you want the vehicle to go. Hard braking can make the skid worse."},
+  {q:"Hydroplaning is most likely to occur when:",opts:["Brakes are worn and wet","Your vehicle rides on a thin film of water, losing contact with the road","You are driving on a gravel road","Engine oil is low"],ans:1,exp:"Hydroplaning occurs when your vehicle rides on a thin film of water between the tires and road surface. It can happen at speeds as low as 35 mph and is made worse by low tire pressure or worn tread."},
+  {q:"When an animal suddenly runs in front of your vehicle, what should you do?",opts:["Always swerve to avoid the animal","Do not swerve into oncoming traffic or off the road — brake and keep control","Speed up to pass quickly","Flash your headlights and honk"],ans:1,exp:"You should not swerve into oncoming traffic or off the roadway to avoid an animal. This can cause a more serious crash. Brake if you have time, but keep control of your vehicle."},
+  {q:"What are the THREE main categories of distracted driving?",opts:["Visual, manual, cognitive","Physical, mental, emotional","Speed, alcohol, fatigue","Texting, calling, eating"],ans:0,exp:"The three main categories of driver distraction are: (1) Visual — taking your eyes off the road, (2) Manual — taking your hands off the wheel, and (3) Cognitive — taking your mind off driving."},
+
+  // === SHARING THE ROAD ===
+  {q:"How much clearance must you give a bicyclist when passing in Florida?",opts:["At least 1 foot","At least 2 feet","At least 3 feet","At least 4 feet"],ans:2,exp:"Florida law requires motorists to give bicyclists a minimum of 3 feet of clearance and use caution when driving next to or passing them."},
+  {q:"You must NOT attempt to share a lane with a motorcycle. Why?",opts:["Motorcycles are always faster","The motorcyclist is entitled to the entire lane","Motorcycles have lower insurance","It is only prohibited on highways"],ans:1,exp:"You must not attempt to share a lane with a motorcycle. The motorcyclist is entitled to the full use of the lane, just as a car driver would be."},
+  {q:"When must you stop for a school bus in Florida?",opts:["Only if you are behind the bus","Only if children are visible outside","In both directions on undivided roads when the bus shows a stop signal, unless separated by a raised median of 5+ feet","Only on roads posted under 45 mph"],ans:2,exp:"On a two-way road, all drivers moving in either direction must stop for a stopped school bus displaying a stop signal. On a divided highway separated by a raised median or barrier at least 5 feet wide, only vehicles behind the bus must stop."},
+  {q:"How far must you stop from a school bus displaying flashing red lights?",opts:["10 feet","20 feet","30 feet","50 feet"],ans:1,exp:"You must stop at least 20 feet from a school bus that has its stop signal arm extended and flashing red lights activated."},
+  {q:"What is the minimum fine for illegally passing a school bus on the side where children enter and exit?",opts:["$100","$265","$465","$1,000"],ans:2,exp:"The minimum fine for passing a school bus on the side where children enter and exit is $465, plus 4 points on your license and a mandatory driver improvement course."},
+
+  // === PARKING & MISCELLANEOUS ===
+  {q:"When parking UPHILL with a curb, which way should you turn your front wheels?",opts:["Toward the curb (right)","Away from the curb (left)","Straight ahead","It does not matter"],ans:1,exp:"When parking uphill with a curb, turn your wheels away from the curb (to the left). If the car rolls, it will roll into the curb and stop. When parking downhill, always turn wheels toward the curb."},
+  {q:"What is the maximum drawbar/towing connection length allowed in Florida (for standard loads)?",opts:["10 feet","15 feet","20 feet","25 feet"],ans:1,exp:"The drawbar or towing connection must not be more than 15 feet long unless you are towing poles, pipes, machinery, or other objects that cannot be easily taken apart."},
+  {q:"What must you use to cover loads that could fall or blow onto the roadway (such as dirt or gravel)?",opts:["Warning flags","A close-fitting cover","Orange safety cones","A safety chain"],ans:1,exp:"You must use a close-fitting cover when hauling loads which could fall or blow onto the roadway, such as dirt, sand, or gravel."},
+  {q:"Leaving the scene of a crash involving injury or death (hit and run) in Florida is classified as:",opts:["A traffic infraction","A misdemeanor","A felony","A civil violation only"],ans:2,exp:"Leaving the scene of a crash involving injury or death is a felony in Florida, and can result in imprisonment, fines, and license revocation."},
+];
+
+
+const TOTAL = 50;
+let pool = [], idx = 0, score = 0, done = false;
+
+function rnd(arr){const a=[...arr];for(let i=a.length-1;i>0;i--){const j=0|Math.random()*(i+1);[a[i],a[j]]=[a[j],a[i]];}return a;}
+
+function show(id){['scr-start','scr-quiz','scr-results'].forEach(s=>document.getElementById(s).style.display=s===id?'block':'none');}
+
+function startQuiz(){
+  pool=rnd(QUESTIONS).slice(0,TOTAL);
+  idx=0;score=0;done=false;
+  show('scr-quiz');
+  render();
+}
+
+function render(){
+  done=false;
+  const q=pool[idx];
+  document.getElementById('progLbl').textContent='Question '+(idx+1)+' / '+TOTAL;
+  document.getElementById('progFill').style.width=((idx/TOTAL)*100)+'%';
+  document.getElementById('progScore').textContent='Score: '+score;
+  document.getElementById('nextBtn').disabled=true;
+  window.scrollTo({top:0,behavior:'smooth'});
+
+  const img=q.img?'<div class="q-img">'+SIGNS[q.img]+'</div>':'';
+  const opts=q.opts.map((o,i)=>
+    '<div class="opt" id="o'+i+'" onclick="pick('+i+')">'
+    +'<div class="opt-l">'+String.fromCharCode(65+i)+'</div>'
+    +'<span>'+o+'</span></div>'
+  ).join('');
+
+  document.getElementById('qArea').innerHTML=
+    '<div class="card">'
+    +'<div class="q-num">Question '+(idx+1)+' of '+TOTAL+'</div>'
+    +img
+    +'<div class="q-text">'+q.q+'</div>'
+    +'<div class="options">'+opts+'</div>'
+    +'<div class="expl" id="expl"><strong>Explanation:</strong> '+q.exp+'</div>'
+    +'</div>';
+}
+
+function pick(i){
+  if(done)return;
+  done=true;
+  const q=pool[idx];
+  document.querySelectorAll('.opt').forEach(el=>el.classList.add('locked'));
+  if(i===q.ans){document.getElementById('o'+i).classList.add('correct');score++;}
+  else{document.getElementById('o'+i).classList.add('wrong');document.getElementById('o'+q.ans).classList.add('correct');}
+  document.getElementById('expl').classList.add('show');
+  document.getElementById('nextBtn').disabled=false;
+  document.getElementById('progScore').textContent='Score: '+score;
+  setTimeout(()=>{const e=document.getElementById('expl');if(e)e.scrollIntoView({behavior:'smooth',block:'nearest'});},120);
+}
+
+function nextQ(){
+  idx++;
+  if(idx>=TOTAL)results();
+  else render();
+}
+
+function results(){
+  show('scr-results');
+  window.scrollTo({top:0,behavior:'smooth'});
+  const pct=Math.round(score/TOTAL*100);
+  const pass=pct>=80;
+  document.getElementById('resPct').textContent=pct+'%';
+  document.getElementById('resRing').className='ring '+(pass?'pass':'fail');
+  document.getElementById('resVerdict').className='verdict '+(pass?'pass':'fail');
+  document.getElementById('resVerdict').textContent=pass?'TEST PASSED!':'NOT PASSED';
+  document.getElementById('resSummary').innerHTML=pass
+    ?'Congratulations! You scored <strong>'+score+' out of '+TOTAL+'</strong> — you met the 80% passing requirement.'
+    :'You scored <strong>'+score+' out of '+TOTAL+'</strong>. You need at least <strong>40 correct</strong> to pass. Review the handbook and try again!';
+  document.getElementById('statC').textContent=score;
+  document.getElementById('statW').textContent=TOTAL-score;
+}
+
+function restart(){show('scr-start');window.scrollTo({top:0,behavior:'smooth'});}
+</script>
+</body>
+</html>
